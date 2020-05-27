@@ -44,7 +44,7 @@ enum FilterEnum {
 const TodosList = () => {
 	const { t } = useTranslation()
 
-	const [filter, setFilter] = useState(FilterEnum.ACTIVE)
+	const [filter, setFilter] = useState(FilterEnum.ALL)
 	const { loading, data = { todos: [] } } = useQuery<{ todos: Todo[] }>(
 		GET_TODOS
 	)
@@ -66,7 +66,7 @@ const TodosList = () => {
 			} else if (forFilter === FilterEnum.COMPLETED) {
 				return todo.checked
 			} else if (forFilter === FilterEnum.ALL) {
-				return false
+				return todo
 			}
 		})
 
@@ -100,7 +100,7 @@ const TodosList = () => {
 										onChange={(e) => {
 											if (e.currentTarget.checked !== checked) {
 												switchCheck({
-													variables: { id: todos[0].id },
+													variables: { id },
 													refetchQueries: ['Todos']
 												})
 											}
@@ -109,6 +109,7 @@ const TodosList = () => {
 									<ToggleLabel className={clsx({ checked })}>
 										<small>
 											{new Date(createdTimestamp).toLocaleDateString('en-US')}
+											&nbsp;
 											{new Date(createdTimestamp).toLocaleTimeString('en-US')}
 											&nbsp;-&nbsp;
 										</small>
@@ -132,11 +133,18 @@ const TodosList = () => {
 			<Footer>
 				<TodoCount>
 					{t('main.footer.itemsLeft', {
-						count: getTodosByFilter(FilterEnum.ALL).length
+						count: getTodosByFilter(FilterEnum.ACTIVE).length
 					})}
 				</TodoCount>
 				<FilterWrapper>
 					<Filter>
+						<FilterLink
+							className={filter === FilterEnum.ALL ? 'selected' : ''}
+							onClick={() => setFilter(FilterEnum.ALL)}
+							href="#/"
+						>
+							{t('main.footer.all')}
+						</FilterLink>
 						<FilterLink
 							className={filter === FilterEnum.ACTIVE ? 'selected' : ''}
 							onClick={() => setFilter(FilterEnum.ACTIVE)}
@@ -150,13 +158,6 @@ const TodosList = () => {
 							href="#/"
 						>
 							{t('main.footer.completed')}
-						</FilterLink>
-						<FilterLink
-							className={filter === FilterEnum.ALL ? 'selected' : ''}
-							onClick={() => setFilter(FilterEnum.ALL)}
-							href="#/"
-						>
-							{t('main.footer.all')}
 						</FilterLink>
 					</Filter>
 				</FilterWrapper>
